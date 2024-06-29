@@ -1,5 +1,4 @@
 from django.shortcuts import render, get_object_or_404
-from .models import Video
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import Video
@@ -10,15 +9,8 @@ def video_list(request):
     return render(request, 'videos/video_list.html', {'videos': videos})
 
 def video_detail(request, pk):
-    video = Video.objects.get(pk=pk)
-    return render(request, 'videos/video_detail.html', {'video': video})
-
-def video_detail(request, pk):
     video = get_object_or_404(Video, pk=pk)
-    context = {
-        'video': video,
-    }
-    return render(request, 'videos/video_detail.html', context)
+    return render(request, 'videos/video_detail.html', {'video': video})
 
 @csrf_exempt
 def update_qos(request, video_id):
