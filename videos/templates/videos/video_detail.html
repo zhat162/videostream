@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QoS Parameters of {{ video.title }}</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        #videoPlayer {
+            width: 100%;
+            max-width: 600px; /* Set the maximum width of the video player */
+            height: auto; /* Maintain the aspect ratio */
+        }
+        .qos-parameters {
+            list-style-type: none;
+            padding: 0;
+        }
+        .qos-parameters li {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{ video.title }}</h1>
+    <video id="videoPlayer" controls>
+        <source src="{{ video.video_file.url }}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    <h2>Quality of Service (QoS) Parameters</h2>
+    <ul class="qos-parameters">
+        <li>Latency: <span id="latency">0</span> ms</li>
+        <li>Bit Rate: <span id="bitRate">0</span> kbps</li>
+        <li>Sync Skew: <span id="syncSkew">0</span> ms</li>
+        <li>Playback Jitter: <span id="playbackJitter">0</span> ms</li>
+        <li>Packet Loss: <span id="packetLoss">0</span>%</li>
+    </ul>
+    <a href="{% url 'video_list' %}">Back to Video List</a>
+
+    <script>
+        $(document).ready(function() {
+            var video = document.getElementById('videoPlayer');
+            var videoId = {{ video.id }};
+
+            function sendQoSData() {
+                var latency = Math.random() * 100;  // Replace with real latency calculation
+                var bitRate = Math.random() * 1000;  // Replace with real bit rate calculation
+                var syncSkew = Math.random() * 100;  // Replace with real sync skew calculation
+                var playbackJitter = Math.random() * 100;  // Replace with real playback jitter calculation
+                var packetLoss = Math.random();  // Replace with real packet loss calculation
+
+                $('#latency').text(latency.toFixed(2));
+                $('#bitRate').text(bitRate.toFixed(2));
+                $('#syncSkew').text(syncSkew.toFixed(2));
+                $('#playbackJitter').text(playbackJitter.toFixed(2));
+                $('#packetLoss').text((packetLoss * 100).toFixed(2));
+
+                $.ajax({
+                    url: "{% url 'update_qos' video.id %}",
+                    type: 'POST',
+                    data: {
+                        'latency': latency,
+                        'bit_rate': bitRate,
+                        'sync_skew': syncSkew,
+                        'playback_jitter': playbackJitter,
+                        'packet_loss': packetLoss,
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    success: function(response) {
+                        console.log('QoS data updated successfully');
+                    },
+                    error: function(response) {
+                        console.log('Error updating QoS data');
+                    }
+                });
+            }
+
+            video.addEventListener('timeupdate', function() {
+                if (!video.paused) {
+                    sendQoSData();
+                }
+            });
+
+            video.addEventListener('play', function() {
+                sendQoSData();
+            });
+        });
+    </script>
+</body>
+</html>

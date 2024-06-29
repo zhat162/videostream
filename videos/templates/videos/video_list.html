@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Videos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 3 columns */
+            gap: 10px;
+            padding: 20px;
+            grid-auto-rows: auto; /* Allow automatic row sizing */
+        }
+        .video-item {
+            position: relative;
+            overflow: hidden;
+        }
+        .video-item video {
+            width: 100%;
+            height: auto; /* Maintain the aspect ratio */
+            display: block;
+        }
+        .video-item .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            font-size: 2em;
+            text-decoration: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .video-item:hover .overlay {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <h1>Select the videos below to check the QoS parameters</h1>
+    <div class="video-grid">
+        {% for video in videos %}
+            <div class="video-item">
+                <video src="{{ video.video_file.url }}" muted></video>
+                <a href="{% url 'video_detail' video.pk %}" class="overlay">&#9658;</a>
+            </div>
+        {% empty %}
+            <p>No videos available.</p>
+        {% endfor %}
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const videoItems = document.querySelectorAll(".video-item");
+
+            function resizeGridItem(item) {
+                const video = item.querySelector("video");
+                video.addEventListener('loadedmetadata', () => {
+                    const aspectRatio = video.videoWidth / video.videoHeight;
+                    if (aspectRatio > 1) {
+                        item.style.gridRowEnd = `span 1`;
+                    } else {
+                        item.style.gridRowEnd = `span 2`;
+                    }
+                });
+            }
+
+            function resizeAllGridItems() {
+                videoItems.forEach(item => resizeGridItem(item));
+            }
+
+            window.addEventListener("resize", resizeAllGridItems);
+            resizeAllGridItems();
+
+            videoItems.forEach(item => {
+                const video = item.querySelector("video");
+                item.addEventListener("mouseover", () => {
+                    video.play();
+                    item.querySelector(".overlay").style.opacity = 0;
+                });
+
+                item.addEventListener("mouseout", () => {
+                    video.pause();
+                });
+            });
+        });
+    </script>
+</body>
+</html>
